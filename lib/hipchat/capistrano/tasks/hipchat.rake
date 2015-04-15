@@ -1,9 +1,52 @@
 require 'hipchat'
+require 'pickup'
+require 'verbs'
 
 namespace :hipchat do
 
+  FUTZ = ->(s) { s[rand(s.length)]=('a'..'z').to_a[rand(26)]; s } 
+
+  SHENANIGANS = ->(silliness) {
+    {
+      ->(s) { s }         => 85,
+      ->(s) { 'deplete' } => silliness,
+      ->(s) { 'explode' } => silliness,
+      FUTZ                => silliness,
+    }
+  }
+
+  MORE_SHENANIGANS = ->(silliness) {
+    {
+    ->(s) { s }               => 80,
+    ->(s) { 'prediction' }    => silliness,
+    ->(s) { 'protection' }    => silliness,
+    ->(s) { 'prevention' }    => silliness,
+    ->(s) { 'abduction' }     => silliness,
+    ->(s) { 'conduction' }    => silliness,
+    ->(s) { 'predilection' }  => silliness,
+    ->(s) { 'percussion' }    => silliness,
+    FUTZ                      => silliness,
+    }
+  }
+
   task :notify_deploy_started do
-    send_message("#{human} is deploying #{deployment_name} to #{environment_string}.", send_options)
+    silliness = fetch(:hipchat_silliness, 3)
+    is_verbing = Pickup.new(SHENANIGANS.call(silliness))
+            .pick(1)
+            .call("deploy")
+            .verb.conjugate(tense: :present, aspect: :progressive)
+
+    e = if (environment_name == 'production')
+          Pickup.new(MORE_SHENANIGANS.call(silliness))
+            .pick(1)
+            .call('production')
+        else
+          environment_name
+        end
+
+    estr = environment_string(e)
+
+    send_message("#{human} #{is_verbing} #{deployment_name} to #{estr}.", send_options)
   end
 
   task :notify_deploy_finished do
@@ -51,11 +94,12 @@ namespace :hipchat do
     }
   end
 
-  def environment_string
+  def environment_string(ename = environment_name)
+    
     if fetch(:stage)
-      "#{fetch(:stage)} (#{environment_name})"
+      "#{fetch(:stage)} (#{ename})"
     else
-      environment_name
+      ename
     end
   end
 

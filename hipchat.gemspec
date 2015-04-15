@@ -22,6 +22,8 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "httparty"
   spec.add_dependency "mimemagic"
+  spec.add_dependency "verbs"
+  spec.add_dependency "pickup"
 
   spec.add_development_dependency "rspec", "~> 3.0"
   spec.add_development_dependency "rr"
