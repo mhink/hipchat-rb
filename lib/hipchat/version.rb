@@ -1,3 +1,3 @@
 module HipChat
-  VERSION = '1.5.0.mh.1'
+  VERSION = '1.5.0.mh.2'
 end
